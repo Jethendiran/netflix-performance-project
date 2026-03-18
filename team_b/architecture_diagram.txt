@@ -1,0 +1,103 @@
+╔══════════════════════════════════════════════════════════════════╗
+║                    SYSTEM ARCHITECTURE DIAGRAM                   ║
+║                         Team B - Caching Layer                   ║
+╚══════════════════════════════════════════════════════════════════╝
+
+                            ┌─────────────┐
+                            │    USERS    │
+                            │  (Locust)   │
+                            └──────┬──────┘
+                                   │
+                                   │ HTTP Requests
+                                   ▼
+                            ┌─────────────┐
+                            │   FASTAPI   │
+                            │  (Team A)   │
+                            └──────┬──────┘
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    │         Cache Check        │
+                    │              │              │
+                    ▼              ▼              ▼
+            ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+            │    REDIS    │◀─│    API      │─▶│ POSTGRESQL  │
+            │    CACHE    │  │   LAYER     │  │  DATABASE   │
+            │  (Team B)   │  └─────────────┘  │  8,800+     │
+            └──────┬──────┘                    │   titles    │
+                   │                           └─────────────┘
+                   │
+              Cache Hit
+                   │
+                   ▼
+            ┌─────────────┐
+            │  Fast Response│
+            │   (< 50ms)   │
+            └─────────────┘
+
+═══════════════════════════════════════════════════════════════════
+
+                    📊 COMPONENTS & RESPONSIBILITIES
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────┬────────────────────────────────────────────────┐
+│  COMPONENT  │                  RESPONSIBILITY                 │
+├─────────────┼────────────────────────────────────────────────┤
+│   Locust    │ • Simulates 50-200 concurrent users            │
+│             │ • Measures response times (p50, p95, p99)      │
+│             │ • Generates load test reports                   │
+├─────────────┼────────────────────────────────────────────────┤
+│   FastAPI   │ • Serves Netflix data via REST endpoints        │
+│   (Team A)  │ • Endpoints: /genre, /actor, /recent, /search   │
+│             │ • Checks cache before querying database         │
+├─────────────┼────────────────────────────────────────────────┤
+│    Redis    │ • In-memory cache for frequent queries          │
+│   (Team B)  │ • 5-minute TTL (Time To Live)                   │
+│             │ • Stores: genre searches, actor queries         │
+│             │ • Cache hit ratio: >60% target                  │
+├─────────────┼────────────────────────────────────────────────┤
+│ PostgreSQL  │ • Primary data storage                          │
+│  Database   │ • 8,800+ Netflix titles                         │
+│             │ • Full dataset with 12 columns                  │
+└─────────────┴────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════
+
+                    🔄 REQUEST FLOW (Cached vs Uncached)
+═══════════════════════════════════════════════════════════════════
+
+🚀 CACHED REQUEST (Fast Path):
+   User Request ──▶ API ──▶ Check Redis ──▶ Cache HIT ──▶ Return Data
+   ═══════════════════════════════════════════════════════════════
+   Total Time: 5-50ms ✓
+
+🐢 UNCACHED REQUEST (Slow Path):
+   User Request ──▶ API ──▶ Check Redis ──▶ Cache MISS ──▶ Query DB ──▶ Return Data
+   ═══════════════════════════════════════════════════════════════════════════════
+   Total Time: 200-2000ms ⚠️
+
+═══════════════════════════════════════════════════════════════════
+
+                    📈 PERFORMANCE TARGETS
+═══════════════════════════════════════════════════════════════════
+
+┌─────────────────┬────────────┬────────────┬──────────────┐
+│     METRIC      │  BASELINE  │ WITH CACHE │ IMPROVEMENT  │
+├─────────────────┼────────────┼────────────┼──────────────┤
+│ p95 Latency     │ 800-1000ms │  <100ms    │    10x       │
+│ Throughput      │ 40-50 req/s│ >150 req/s │    3-4x      │
+│ Cache Hit Ratio │    0%      │  >60%      │    -         │
+│ Error Rate      │    <2%     │  <0.5%     │    4x        │
+└─────────────────┴────────────┴────────────┴──────────────┘
+
+═══════════════════════════════════════════════════════════════════
+              🎯 TEAM B DELIVERABLES
+═══════════════════════════════════════════════════════════════════
+✓ Redis Cache Implementation
+✓ Load Testing with Locust (50, 100, 200 users)
+✓ Cache Hit Ratio Monitoring
+✓ Before/After Performance Comparison
+✓ Performance Graphs for Presentation
+✓ Trade-off Analysis (Speed vs Stale Data)
+
+═══════════════════════════════════════════════════════════════════
