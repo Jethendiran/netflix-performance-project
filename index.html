@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Netflix Clone</title>
+    <title>Netflix Pro Clone</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <style>
         body {
             margin: 0;
@@ -12,14 +14,14 @@
 
         header {
             background: black;
-            padding: 15px 30px;
-            font-size: 24px;
+            padding: 15px 20px;
             color: red;
+            font-size: 26px;
             font-weight: bold;
         }
 
         .banner {
-            height: 300px;
+            height: 320px;
             background: url("https://image.tmdb.org/t/p/w1280/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg") center/cover;
             display: flex;
             align-items: flex-end;
@@ -34,19 +36,10 @@
         }
 
         input {
-            padding: 10px;
-            width: 250px;
+            padding: 12px;
+            width: 260px;
             border-radius: 5px;
             border: none;
-        }
-
-        button {
-            padding: 10px 15px;
-            background: red;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
         }
 
         .row {
@@ -64,18 +57,34 @@
         }
 
         .card {
-            min-width: 150px;
-            margin-right: 10px;
+            margin-right: 12px;
             transition: transform 0.3s;
+            position: relative;
         }
 
         .card img {
-            width: 150px;
-            border-radius: 8px;
+            width: 160px;
+            border-radius: 10px;
         }
 
         .card:hover {
-            transform: scale(1.1);
+            transform: scale(1.15);
+        }
+
+        .info {
+            position: absolute;
+            bottom: 5px;
+            left: 5px;
+            font-size: 12px;
+            background: rgba(0,0,0,0.7);
+            padding: 5px;
+            border-radius: 5px;
+        }
+
+        @media(max-width:600px) {
+            .card img {
+                width: 120px;
+            }
         }
     </style>
 </head>
@@ -84,26 +93,25 @@
 
 <header>NETFLIX</header>
 
-<div class="banner">Interstellar</div>
+<div class="banner">🔥 Trending Now</div>
 
 <div class="search-box">
-    <input id="genre" placeholder="Search Genre (Sci-Fi, Action)">
-    <button onclick="searchMovies()">Search</button>
+    <input id="search" placeholder="Live Search (Sci-Fi, Action)" oninput="liveSearch()">
 </div>
 
 <div class="row">
-    <h2>🎬 Trending</h2>
-    <div class="movies" id="trending"></div>
-</div>
-
-<div class="row">
-    <h2>🔥 Action</h2>
-    <div class="movies" id="action"></div>
+    <h2>🎬 Movies</h2>
+    <div class="movies" id="movies"></div>
 </div>
 
 <div class="row">
     <h2>🚀 Sci-Fi</h2>
     <div class="movies" id="scifi"></div>
+</div>
+
+<div class="row">
+    <h2>🔥 Action</h2>
+    <div class="movies" id="action"></div>
 </div>
 
 <script>
@@ -114,11 +122,42 @@ const posters = {
     "Interstellar": "https://image.tmdb.org/t/p/w500/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg"
 };
 
-async function loadCategory(genre, elementId) {
+function randomRating() {
+    return (Math.random() * 2 + 3).toFixed(1);
+}
+
+async function loadMovies(genre="Sci-Fi") {
     let res = await fetch(`http://127.0.0.1:8000/genre/${genre}`);
     let data = await res.json();
 
-    let container = document.getElementById(elementId);
+    let container = document.getElementById("movies");
+    container.innerHTML = "";
+
+    if(data.length === 0){
+        container.innerHTML = "<p style='color:gray'>No movies found</p>";
+        return;
+    }
+
+    data.forEach(movie => {
+        let img = posters[movie.title] || "";
+
+        container.innerHTML += `
+            <div class="card">
+                <img src="${img}">
+                <div class="info">
+                    ⭐ ${randomRating()}<br>
+                    ${movie.title}
+                </div>
+            </div>
+        `;
+    });
+}
+
+async function loadCategory(genre, id){
+    let res = await fetch(`http://127.0.0.1:8000/genre/${genre}`);
+    let data = await res.json();
+
+    let container = document.getElementById(id);
     container.innerHTML = "";
 
     data.forEach(movie => {
@@ -132,15 +171,22 @@ async function loadCategory(genre, elementId) {
     });
 }
 
-async function searchMovies() {
-    let genre = document.getElementById("genre").value;
-    loadCategory(genre, "trending");
+function liveSearch() {
+    let term = document.getElementById("search").value;
+
+    if(term.length === 0){
+        loadMovies("Sci-Fi");
+    } else {
+        loadMovies(term);
+    }
 }
 
-// Load default rows
-loadCategory("Action", "action");
-loadCategory("Sci-Fi", "scifi");
-loadCategory("Sci-Fi", "trending");
+// 🚀 AUTO LOAD
+window.onload = () => {
+    loadMovies("Sci-Fi");
+    loadCategory("Sci-Fi", "scifi");
+    loadCategory("Action", "action");
+};
 </script>
 
 </body>
