@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Netflix Clone</title>
+    <style>
+        body {
+            margin: 0;
+            background: #141414;
+            color: white;
+            font-family: Arial;
+        }
+
+        header {
+            background: black;
+            padding: 15px 30px;
+            font-size: 24px;
+            color: red;
+            font-weight: bold;
+        }
+
+        .banner {
+            height: 300px;
+            background: url("https://image.tmdb.org/t/p/w1280/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg") center/cover;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .search-box {
+            text-align: center;
+            margin: 20px;
+        }
+
+        input {
+            padding: 10px;
+            width: 250px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            padding: 10px 15px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .row {
+            margin: 20px;
+        }
+
+        .row h2 {
+            margin-left: 10px;
+        }
+
+        .movies {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+        }
+
+        .card {
+            min-width: 150px;
+            margin-right: 10px;
+            transition: transform 0.3s;
+        }
+
+        .card img {
+            width: 150px;
+            border-radius: 8px;
+        }
+
+        .card:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+
+<body>
+
+<header>NETFLIX</header>
+
+<div class="banner">Interstellar</div>
+
+<div class="search-box">
+    <input id="genre" placeholder="Search Genre (Sci-Fi, Action)">
+    <button onclick="searchMovies()">Search</button>
+</div>
+
+<div class="row">
+    <h2>🎬 Trending</h2>
+    <div class="movies" id="trending"></div>
+</div>
+
+<div class="row">
+    <h2>🔥 Action</h2>
+    <div class="movies" id="action"></div>
+</div>
+
+<div class="row">
+    <h2>🚀 Sci-Fi</h2>
+    <div class="movies" id="scifi"></div>
+</div>
+
+<script>
+const posters = {
+    "Inception": "https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg",
+    "Titanic": "https://image.tmdb.org/t/p/w500/9xjZS2rlVxm8SFx8kPC3aIGCOYQ.jpg",
+    "Avengers": "https://image.tmdb.org/t/p/w500/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg",
+    "Interstellar": "https://image.tmdb.org/t/p/w500/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg"
+};
+
+async function loadCategory(genre, elementId) {
+    let res = await fetch(`http://127.0.0.1:8000/genre/${genre}`);
+    let data = await res.json();
+
+    let container = document.getElementById(elementId);
+    container.innerHTML = "";
+
+    data.forEach(movie => {
+        let img = posters[movie.title] || "";
+
+        container.innerHTML += `
+            <div class="card">
+                <img src="${img}">
+            </div>
+        `;
+    });
+}
+
+async function searchMovies() {
+    let genre = document.getElementById("genre").value;
+    loadCategory(genre, "trending");
+}
+
+// Load default rows
+loadCategory("Action", "action");
+loadCategory("Sci-Fi", "scifi");
+loadCategory("Sci-Fi", "trending");
+</script>
+
+</body>
+</html>
