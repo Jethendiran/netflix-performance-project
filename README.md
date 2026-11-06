@@ -1,4 +1,4 @@
-Netflix Performance Optimization using Redis Caching
+ Netflix Performance Optimization using Redis Caching
 
 Project Overview
 
@@ -69,7 +69,7 @@ Enhances scalability
 Requires proper cache management
 
 👥 Team Members
-jethendiran – API Development
+Jethendiran – API Development
 Madhan Kumar – Performance Testing
 Sai Sumanth – Integration & Presentation
 
